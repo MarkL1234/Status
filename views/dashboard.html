@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+</head>
+<body>
+    <h1>Welcome to your Dashboard!</h1>
+    <p>Username: <span id="username"></span></p>
+    <p>Status: <span id="status">New</span></p>
+
+    <form id="statusForm">
+        <label for="newStatus">Change Status:</label>
+        <select id="newStatus">
+            <option value="Free">Free</option>
+            <option value="On call">On call</option>
+            <option value="New">New</option>
+        </select>
+        <button type="submit">Update Status</button>
+    </form>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const username = urlParams.get('username');
+        document.getElementById('username').textContent = username;
+
+        // Fetch and update status every 5 seconds
+        async function fetchStatus() {
+            try {
+                const response = await fetch(`/status?username=${username}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('status').textContent = data.status;
+                }
+            } catch (error) {
+                console.error('Error fetching status:', error);
+            }
+        }
+
+        setInterval(fetchStatus, 5000); // Fetch every 5 seconds
+        fetchStatus(); // Initial fetch
+
+        // Handle status update form submission
+        const form = document.getElementById('statusForm');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newStatus = document.getElementById('newStatus').value;
+
+            try {
+                const response = await fetch('/status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, status: newStatus })
+                });
+
+                if (response.ok) {
+                    alert('Status updated successfully');
+                    fetchStatus(); // Refresh status display
+                } else {
+                    alert('Failed to update status');
+                }
+            } catch (error) {
+                console.error('Error updating status:', error);
+            }
+        });
+    </script>
+</body>
+</html>
