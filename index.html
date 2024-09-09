@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple CRM</title>
+</head>
+<body>
+  <h1>Simple CRM</h1>
+  <form id="userForm">
+    <input type="text" id="name" placeholder="Name" required>
+    <select id="status">
+      <option value="Free">Free</option>
+      <option value="On call">On call</option>
+    </select>
+    <button type="submit">Add User</button>
+  </form>
+  <ul id="userList"></ul>
+
+  <script>
+    const form = document.getElementById('userForm');
+    const userList = document.getElementById('userList');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name').value;
+      const status = document.getElementById('status').value;
+
+      await fetch('/addUser', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, status })
+      });
+
+      document.getElementById('name').value = '';
+      loadUsers();
+    });
+
+    async function loadUsers() {
+      const response = await fetch('/users');
+      const users = await response.json();
+      userList.innerHTML = users.map(user => `<li>${user.name}: ${user.status}</li>`).join('');
+    }
+
+    loadUsers();
+  </script>
+</body>
+</html>
